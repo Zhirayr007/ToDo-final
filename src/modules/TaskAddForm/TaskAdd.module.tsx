@@ -3,9 +3,9 @@ import { observer } from 'mobx-react';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import { validationSchema } from './TaskAdd.modul.constans';
 import { TaskAddStoreInstance } from './store';
-import { Checkbox, TextField } from 'components/index';
 import { TaskEntityAdd } from 'domains/index';
 import { PATH_LIST } from 'constants/paths';
 
@@ -46,12 +46,14 @@ export function TaskAddProto() {
         name="name"
         render={({ field, fieldState: { error } }) => (
           <TextField
-            onBlurValue={field.onBlur}
+            sx={{ width: '100%', height: '50px' }}
+            onBlur={field.onBlur}
             label={'Task name'}
             placeholder={'Clean room'}
             value={field.value}
             onChange={nameChange}
-            errorText={error?.message}
+            helperText={error?.message}
+            error={!!error?.message}
           />
         )}
       />
@@ -60,28 +62,34 @@ export function TaskAddProto() {
         name="info"
         render={({ field, fieldState: { error } }) => (
           <TextField
-            onBlurValue={field.onBlur}
-            label={'What to do(description)'}
+            sx={{ width: '100%', height: '50px' }}
+            margin="normal"
+            onBlur={field.onBlur}
+            label="What to do(description)"
             placeholder={'Clean my room'}
             value={field.value}
             onChange={descrChange}
-            errorText={error?.message}
+            helperText={error?.message}
+            error={!!error?.message}
           />
         )}
       />
+
       <Controller
         control={control}
         name="isImportant"
-        render={({ field }) => <Checkbox label={'Important'} onChange={imporChange} checked={field.value} />}
+        render={({ field }) => (
+          <FormControlLabel control={<Checkbox checked={field.value} onChange={imporChange} />} label="Important" />
+        )}
       />
-      <div className="button" style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button type="submit" className="btn btn-secondary d-block w-20" disabled={!isValid}>
+      <Box component="div" display="flex" justifyContent="space-between">
+        <Button variant="contained" type="submit" disabled={!isValid}>
           Add task
-        </button>
-        <button className="btn btn-secondary d-block w-20" onClick={clickReset}>
+        </Button>
+        <Button variant="contained" onClick={clickReset}>
           Reset
-        </button>
-      </div>
+        </Button>
+      </Box>
     </form>
   );
 }

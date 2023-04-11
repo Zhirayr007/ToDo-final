@@ -3,14 +3,14 @@ import { observer } from 'mobx-react';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useNavigate } from 'react-router-dom';
+import { Button, Checkbox, CircularProgress, FormControlLabel, TextField } from '@mui/material';
 import { validationSchemaEdit } from './TaskEdit.modul.constans';
 import { TaskEditStoreInstance } from './store';
 import { TaskEditProps } from './TaskEdit.types';
-import { Checkbox, TextField, Loader } from 'components/index';
 import { TaskEntity } from 'domains/Task.entity';
 import { PATH_LIST } from 'constants/paths';
 
-export function TaskEditProto({ Id }: TaskEditProps) {
+function TaskEditProto({ Id }: TaskEditProps) {
   const { task, isTasksLoading, changeTask } = TaskEditStoreInstance;
   const navigate = useNavigate();
   const {
@@ -22,7 +22,7 @@ export function TaskEditProto({ Id }: TaskEditProps) {
     formState: { isValid },
   } = useForm<TaskEntity>({
     mode: 'onBlur',
-    defaultValues: task,
+    defaultValues: task, //начальное значения
     resolver: yupResolver(validationSchemaEdit),
   });
 
@@ -45,9 +45,7 @@ export function TaskEditProto({ Id }: TaskEditProps) {
       setValue('isImportant', false);
     }
   };
-
   const disableIsImportant = watch('isDone');
-
   const onSubmitEdit = (data: TaskEntity) => {
     changeTask(Id, data).then((res) => {
       if (res) {
@@ -55,59 +53,76 @@ export function TaskEditProto({ Id }: TaskEditProps) {
       }
     });
   };
-
-  return (
+  return isTasksLoading ? (
+    <CircularProgress />
+  ) : (
     <form onSubmit={handleSubmit(onSubmitEdit)}>
-      <Loader isLoading={isTasksLoading}>
-        <Controller
-          control={control}
-          name="name"
-          render={({ field, fieldState: { error } }) => (
-            <TextField
-              onBlurValue={field.onBlur}
-              label={'Task name'}
-              placeholder={'Clean room'}
-              value={field.value}
-              onChange={nameChange}
-              errorText={error?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="info"
-          render={({ field, fieldState: { error } }) => (
-            <TextField
-              onBlurValue={field.onBlur}
-              label={'What to do(description)'}
-              placeholder={'Clean my room'}
-              value={field.value}
-              onChange={descrChange}
-              errorText={error?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="isImportant"
-          render={({ field }) => (
-            <Checkbox
-              label={'Important'}
-              onChange={imporChange}
-              checked={disableIsImportant ? false : field.value}
-              disabled={disableIsImportant}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="isDone"
-          render={({ field }) => <Checkbox label={'Completed'} onChange={doneChange} checked={field.value} />}
-        />
-        <button type="submit" className="btn btn-secondary d-block w-100" disabled={!isValid}>
-          Edit task
-        </button>
-      </Loader>
+      <Controller
+        control={control}
+        name="name"
+        render={({ field, fieldState: { error } }) => (
+          <TextField
+            sx={{ width: '100%', height: '50px' }}
+            margin="normal"
+            onBlur={field.onBlur}
+            label="Task name"
+            placeholder={'Clean room'}
+            value={field.value}
+            onChange={nameChange}
+            helperText={error?.message}
+            error={!!error?.message}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="info"
+        render={({ field, fieldState: { error } }) => (
+          <TextField
+            sx={{ width: '100%', height: '50px' }}
+            margin="normal"
+            onBlur={field.onBlur}
+            label="What to do(description)"
+            placeholder={'Clean my room'}
+            value={field.value}
+            onChange={descrChange}
+            helperText={error?.message}
+            error={!!error?.message}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="isImportant"
+        render={({ field }) => (
+          <FormControlLabel
+            sx={{ marginTop: '15px', display: 'block' }}
+            control={
+              <Checkbox
+                onChange={imporChange}
+                checked={disableIsImportant ? false : field.value}
+                disabled={disableIsImportant}
+              />
+            }
+            label="Important"
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="isDone"
+        render={({ field }) => (
+          <FormControlLabel
+            sx={{ display: 'block' }}
+            control={<Checkbox checked={field.value} onChange={doneChange} />}
+            label="Completed"
+          />
+        )}
+      />
+      <Button type="submit" variant="contained" disabled={!isValid}>
+        Edit task
+      </Button>
     </form>
   );
 }
